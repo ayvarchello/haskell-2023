@@ -33,5 +33,7 @@ executable monad-transformers
       base ^>=4.14.3.0
       , unordered-containers
       , transformers
+      , haskeline
+      , mtl
     hs-source-dirs:   app
     default-language: Haskell2010
