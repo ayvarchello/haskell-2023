@@ -1,10 +1,11 @@
 module Bank.Handle where
 
 import Data.Array.IO (IOArray)
+import Numeric.Natural (Natural)
 
 type Account = Int
 
-type Balance = Integer
+type Balance = Natural
 
 newtype BankHandle = BankHandle {getBankStorage :: IOArray Account Balance}
 
