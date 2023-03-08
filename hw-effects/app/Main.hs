@@ -3,7 +3,7 @@ module Main where
 import Bank.Handle (Account, Balance, BankHandle)
 
 data Input
-  = INewAccount Account
+  = INewAccount
   | IDeleteAccount Account
   | ITransfer Account Balance Account
   deriving (Read)
