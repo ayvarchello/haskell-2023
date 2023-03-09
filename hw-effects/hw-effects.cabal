@@ -27,7 +27,7 @@ executable hw-effects
     build-depends:
       base
       , hw-effects
-      , array
+      , containers
       , transformers
     hs-source-dirs:   app
     default-language: Haskell2010
