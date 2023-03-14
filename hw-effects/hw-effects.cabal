@@ -27,20 +27,22 @@ executable hw-effects
     build-depends:
       base
       , hw-effects
-      , array
+      , containers
       , transformers
     hs-source-dirs:   app
     default-language: Haskell2010
 
 library
-    exposed-modules:  Bank, Bank.Error
+    exposed-modules:
+      Bank
+      , Bank.Error
+      , Data.Accounts
     build-depends:    base ^>=4.16
     hs-source-dirs:   src
     default-language: Haskell2010
 
 library pure-bank
     exposed-modules:  Bank.Pure
-    other-modules:    Data.Accounts
     build-depends:
       base
       , hw-effects
