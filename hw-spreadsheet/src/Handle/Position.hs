@@ -1,9 +1,10 @@
 module Handle.Position where
 
-import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.Reader (MonadReader)
-import Data.Direction (Direction)
-import Data.IORef (IORef)
+import Control.Monad.Trans
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.Reader (MonadReader, asks)
+import Data.Direction (Direction, updatePosition)
+import Data.IORef (IORef, newIORef, readIORef, modifyIORef)
 import Data.Spreadsheet (Index)
 
 newtype PositionHandle = PositionHandle {getPositionHandle :: IORef Index}
@@ -17,10 +18,16 @@ instance HasPosition PositionHandle where
 -- (0.5 балла) Реализуйте интерфейс курсора таблицы.
 
 newPositionHandle :: Index -> IO PositionHandle
-newPositionHandle = error "newPositionHandle is not defined"
+newPositionHandle idx = do
+  positionRef <- newIORef idx
+  return $ PositionHandle positionRef
 
-getPosition :: (HasPosition e, MonadReader e m, MonadIO m) => m Index
-getPosition = error "getPosition is not defined"
+getPosition :: (HasPosition env, MonadReader env m, MonadIO m) => m Index
+getPosition = do
+  positionRef <- asks (getPositionHandle . position)
+  liftIO $ readIORef positionRef
 
-movePosition :: (HasPosition e, MonadReader e m, MonadIO m) => Direction -> m ()
-movePosition d = error "movePosition is not defined"
+movePosition :: (HasPosition env, MonadReader env m, MonadIO m) => Direction -> m ()
+movePosition d = do
+  positionRef <- asks (getPositionHandle . position)
+  liftIO $ modifyIORef positionRef (updatePosition d)

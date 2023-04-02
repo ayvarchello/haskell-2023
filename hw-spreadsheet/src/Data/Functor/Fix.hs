@@ -13,4 +13,4 @@ ffix ::
   f a
 -- ^ @ffix@ is a function for computing a data structure @f@ of results of type
 -- @a@ which might depend on the resulting data structure itself.
-ffix x = go where go = error "ffix is not defined"
+ffix x = fmap ($ ffix x) x

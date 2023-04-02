@@ -4,15 +4,22 @@
 
 module Handle.Focused where
 
+import Control.Monad(when)
 import Control.Monad.Except (MonadError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (MonadReader)
-import Data.Direction (Direction)
-import Data.Spreadsheet (EvalError, Index, Spreadsheet)
-import Handle.Position (HasPosition, PositionHandle)
+
+import Handle.Position (HasPosition, PositionHandle, newPositionHandle)
 import qualified Handle.Position as P
-import Handle.Spreadsheet (Cell, HasSpreadsheet (..), SpreadsheetHandle, Value)
+import Handle.Spreadsheet (Cell, HasSpreadsheet (..), SpreadsheetHandle, Value, newSpreadsheetHandle)
 import qualified Handle.Spreadsheet as S
+
+import Data.Array (Ix(index), Array)
+import Data.IORef(readIORef, writeIORef)
+import Control.Monad.Reader (MonadReader, ask, asks)
+import Data.Direction (Direction)
+import Data.Spreadsheet (EvalError, Index, Spreadsheet, emptySS)
+
 
 data FocusedHandle f = FocusedHandle
   { positionHandle :: PositionHandle,
@@ -35,22 +42,34 @@ instance HasSpreadsheet f (FocusedHandle f) where
 -- автоматически расширяется по надобности.
 
 newFocusedHandle :: Index -> IO (FocusedHandle f)
-newFocusedHandle index = error "newFocusedHandle is not defined"
+newFocusedHandle index = do
+  pos <- newPositionHandle index
+  ss <- newSpreadsheetHandle emptySS
+  pure $ FocusedHandle pos ss
 
 getPosition :: (HasFocused f e, MonadReader e m, MonadIO m) => m Index
-getPosition = error "getPosition is not defined"
+getPosition = P.getPosition
 
 currentCell ::
-  (HasFocused f e, MonadReader e m, MonadIO m) => m (Maybe (Cell f))
-currentCell = error "currentCell is not defined"
+    (HasFocused f e, MonadReader e m, MonadIO m) => m (Maybe (Cell f))
+currentCell = do
+  pos <- getPosition
+  S.readCell pos
 
 writeCurrent ::
   (HasFocused f e, MonadReader e m, MonadIO m) => Maybe (Cell f) -> m ()
-writeCurrent cell = error "writeCurrent is not defined"
+writeCurrent cell = do
+  pos <- getPosition
+  S.writeCell pos cell
 
 movePosition ::
   (HasFocused f e, MonadReader e m, MonadIO m) => Direction -> m ()
-movePosition dir = error "movePosition is not defined"
+movePosition dir = do
+  P.movePosition dir
+  pos <- getPosition
+  bounds <- S.bounds
+  when (snd pos > snd (snd bounds)) S.appendCol
+  when (fst pos > fst (snd bounds)) S.appendRow 
 
 calc ::
   ( Traversable f,
@@ -62,4 +81,4 @@ calc ::
   (f (n Value) -> n Value) ->
   Integer ->
   m (Spreadsheet (n Value))
-calc = error "calc is not defined"
+calc = S.calcSpreadsheet

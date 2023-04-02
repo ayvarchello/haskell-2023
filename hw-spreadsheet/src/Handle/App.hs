@@ -6,14 +6,16 @@ module Handle.App where
 
 import Control.Monad.Except (MonadError)
 import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.Reader (MonadReader)
-import Data.AppView (AppView)
+import Control.Monad.Reader (MonadReader, asks)
+import Data.AppView (AppView(AppView))
 import Data.Direction (Direction)
 import Data.Spreadsheet (EvalError, Index, Spreadsheet)
 import Handle.Focused (FocusedHandle, HasFocused (..))
 import qualified Handle.Focused as F
 import Handle.Position (HasPosition (..))
 import Handle.Spreadsheet (Cell, HasSpreadsheet (..), Value)
+import qualified Data.Spreadsheet as S
+import qualified Handle.Spreadsheet as F
 
 data AppHandle f m = AppHandle
   { algebra :: f (m Value) -> m Value,
@@ -40,14 +42,17 @@ instance HasFocused f (AppHandle f m) where
 
 newAppHandle ::
   (f (m Value) -> m Value) -> Integer -> Index -> IO (AppHandle f m)
-newAppHandle alg limit index = error "newAppHandle is not defined"
+newAppHandle f limit index = do
+  handle <- F.newFocusedHandle index
+  return $ AppHandle f limit handle
+
 
 movePosition :: (HasApp f n e, MonadReader e m, MonadIO m) => Direction -> m ()
-movePosition = error "movePosition is not defined"
+movePosition = F.movePosition
 
 writeCurrent ::
   (HasApp f n e, MonadReader e m, MonadIO m) => Maybe (Cell f) -> m ()
-writeCurrent = error "writeCurrent is not defined"
+writeCurrent = F.writeCurrent
 
 view ::
   ( HasApp f n e,
@@ -57,4 +62,8 @@ view ::
     MonadIO m
   ) =>
   m (AppView f n Value)
-view = error "view is not defined"
+view = asks app >>= \app ->
+  F.calcSpreadsheet (algebra app) (recursionLimit app) >>= \ssView ->
+    F.currentCell >>= \cell ->
+      F.getPosition >>= \position ->
+        return $ AppView position cell ssView

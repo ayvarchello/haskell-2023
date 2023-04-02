@@ -13,8 +13,8 @@ version:            0.1.0.0
 
 -- The license under which the package is released.
 -- license:
-author:             TurtlePU
-maintainer:         sokolov.p64@gmail.com
+author:             Ayvar Shakirov
+maintainer:         arshakirov@edu.hse.ru
 
 -- A copyright notice.
 -- copyright:
@@ -50,6 +50,7 @@ library
       , free
       , array
       , mtl ^>=2.3.1
-      , pretty
+      , tabl
+      , text
     hs-source-dirs:   src
     default-language: Haskell2010
